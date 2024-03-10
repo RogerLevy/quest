@@ -1,0 +1,12 @@
+\ Scenes
+\ : {{ postpone { here dup 5 + compile, ; immediate
+\ : }} postpone } postpone exit ; immediate
+\ : overworld bg0 {{ draw> world.map world.t0 tilemap }} ;
+motif /2dslice ofield slc var t0
+c: *plane draw> t0 @ tbase !   slc tilemap ;
+
+: warp bg0 { world.map -rot 20 15 2* 20 15 slc 2dslice drop } ;
+
+: overworld
+    0 0 warp bg0 { world.t0 t0 ! }
+;

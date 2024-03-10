@@ -1,0 +1,60 @@
+\ - Define tilesets and maps
+: (csv-wh) read> 0 here cell+ ! lines> 0 here ! 1 here cell+ +! csv> 2drop 1 here +! ;
+: csv-wh (csv-wh) here v@ ;
+: map: create 2dup csv-wh slice2d, read> lines> csv> evaluate , ;
+0 value t#
+: tileset: t# constant t# tileset to t# ;
+
+\ - Draw Map
+\ : tiles ( stride a w h - )
+\ : tilemap ( 2dslice - )
+: >tile dup 28 rshift swap tbase @ + glyph ;
+: tile dup 0< if drop exit then >tile fblit ;
+: tiles | h w | h for w for i j at @+ tile tw +loop over + th +loop 2drop ;
+: tilemap >r r@ stride r@ adr @ r> dims@ tw th 2* tiles ;
+
+\ Directional stuff
+0 constant right_
+1 constant up_
+2 constant left_
+3 constant down_
+create walkv 1. , 0 ,   0 , -1. ,   -1. , 0 ,   0 , 1. , 
+
+\ - Z-offset sprites
+motif var z +basis
+: elevated 0 z @ negate 2i sx v@ 2p/ 2p>f 1e 1e 0e transform ;
+
+\ - Simple state counter
+motif var ctr +basis
+: (after) delta ctr +!   ctr @ >= if r> drop else 0 ctr ! then ;
+: after> postpone (after) postpone (act>) discard-sinline ; immediate
+
+\ - Input tools
+motif var dir +basis
+: dirkeys? <left> held? <right> held? or <up> held? or <down> held? or ;
+: dirkeysup? <left> letgo? <right> letgo? or <up> letgo? or <down> letgo? or ;
+: pudlr4 ( -- )  \ detects presses, no diagonals, no velocity stuff
+        <left> pressed? if left_ dir ! exit then
+        <right> pressed? if right_ dir ! exit then
+        <up> pressed? if up_ dir ! exit then
+        <down> pressed? if down_ dir ! exit then ;
+: sudlr4 ( -- )  \ detects state, no diagonals, no velocity stuff
+        <left> held? if left_ dir ! exit then
+        <right> held? if right_ dir ! exit then
+        <up> held? if up_ dir ! exit then
+        <down> held? if down_ dir ! exit then ;
+
+\ - Game containers
+: matte x v@ 2p>s gamew zoom sf* gameh zoom sf* clip! ;
+: center
+    winw 2 /  gamew zoom sf* 2 / -
+        winh 64 - 2 /  gameh zoom sf* 2 / -  2s>p x v!
+    zoom f>p dup sx v!
+;
+c: *game act> center draw> matte cls ;
+
+ws1 {
+    *game named game {
+        container: stage { [locked] [bolted] }
+    }
+}

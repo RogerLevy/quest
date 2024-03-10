@@ -1,0 +1,5 @@
+\ - Data
+z" data/bmp/world_tiles.png" loadbmp 16 16 tileset: WORLD_T0 
+z" data/bmp/samurai.pcx" loadbmp 16 16 tileset: SAM_T0
+s" data/csv/overworld_overworld.csv" map: overworld.2d
+

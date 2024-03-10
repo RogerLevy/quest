@@ -1,0 +1,5 @@
+cwd ../vfxland4   
+include  ../vfxland4/vfxland4.vfx   
+cwd ../prg
+include main.vfx
+go

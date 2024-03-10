@@ -1,0 +1,58 @@
+\ : tileset ( bmp tw th n - n+? )
+
+\ - Primitives
+: 2, swap , , ;
+: 2* rot * >r * r> ;
+: as> { r> execute } ;
+synonym 's ->
+variable (dp)
+: h[ dp @ (dp) ! dp ! ;
+: ]h (dp) @ dup dp ! ;
+
+\ - Slice
+0 cell field len cell field adr constant /slice
+: [] adr @ swap cells + ;
+: len@ len @ ;
+: !len here over - cell / 2 - swap ! ;
+: array, dup , here cell+ , cells allot&erase ;
+\ : *array dup cells * /slice + allocate throw h[ array, ]h ;
+: array: create array, ;
+
+\ - 2D Slice
+0 cell field cols cell field rows cell field pitch cell field adr constant /slice2d
+: [][] ( c r a - a ) >r r@ pitch @ * swap cells + r> adr @ + ;
+: in-bounds? ( c r a - ? ) >r r@ rows @ < swap r> cols @ < and ;
+: move2d ( s d c r - ) | r c d s |
+    s rows @ for
+        s cols @ for
+            c i + r j + d in-bounds? if
+                i j s [][] @ c i + r j + d [][] !
+            then
+        loop
+    loop ;
+: slice2d, over swap 2, cells , here cell+ , ;
+: array2d: create 2dup slice2d, * cells allot&erase ;
+: slice2d ( s c r w h d - d ) | d h w r c s |
+    c r s [][] d adr !
+    w d cols ! h d rows !
+    s pitch @ d pitch !
+    d ;
+: dims@ cols v@ ;
+
+\ - Glyphs
+16 16 *bmp constant blank.bmp
+: blanks, for blank.bmp , loop ;
+create glyphs 65536 , here cell+ , 65536 blanks,
+: +glyph over 65536 >= abort" Out of glyph space!" over glyphs [] ! 1 + ;
+: glyph $ffff and glyphs [] @ ;
+
+\ - Tiles and tilemap tools
+variable tbase
+: tw tbase @ glyph bmpw ;
+: th tbase @ glyph bmph ;
+: stride dup pitch @ swap cols @ cells - ;
+: tileset | n th tw b | n b bmph for b bmpw for i j at b tw th subbmp +glyph tw +loop th +loop ;
+
+\ - Misc
+: $singleton public pad place pad $obj private motif ;
+: impose me over insert-after   -> x v@ x v! ;

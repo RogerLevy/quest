@@ -1,0 +1,16 @@
+20 15 array2d: bg0.2d
+
+\ - Loading screens
+create src.2d /slice2d allot
+: screen 20 15 2* overworld.2d -rot 20 15 src.2d slice2d ;
+: goto screen bg0.2d 0 0 move2d ;
+
+\ - Global screen elements
+c: *bg0 draw> WORLD_T0 tbase ! bg0.2d tilemap ;
+
+\ - Global world setup
+stage { 
+    0 0 at *bg0 named bg0 { }
+}
+
+0 0 goto
